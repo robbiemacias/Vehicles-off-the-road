@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Offset Calculator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">GHG Offset: Vehicle Equivalency Calculator</h2>
+
+        <div class="mb-4">
+            <label for="energy" class="block text-gray-700 text-sm font-medium mb-2">Energy (MMBtu):</label>
+            <input type="number" id="energy" step="any" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out">
+        </div>
+
+        <div class="mb-4">
+            <label for="baseline_fuel_select" class="block text-gray-700 text-sm font-medium mb-2">Select Baseline Fuel:</label>
+            <select id="baseline_fuel_select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out">
+                <option value="">-- Select a fuel --</option>
+                <option value="100.72">Fossil Gasoline (CARB CI: 100.72 gCO₂e/MJ)</option>
+                <option value="82.87">Fossil Diesel (CARB CI: 82.87 gCO₂e/MJ)</option>
+                <option value="73.81">Fossil Natural Gas (CARB CI: 73.81 gCO₂e/MJ)</option>
+            </select>
+        </div>
+
+        <div class="mb-6">
+            <label for="ci_renewable" class="block text-gray-700 text-sm font-medium mb-2">CI of RNG (gCO₂e/MJ):</label>
+            <input type="number" id="ci_renewable" step="any" placeholder="e.g., -320" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out">
+        </div>
+
+        <button onclick="calculate()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200 ease-in-out shadow-md hover:shadow-lg">
+            Calculate GHG Savings
+        </button>
+
+        <div class="results mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg text-gray-800 hidden" id="results">
+            <!-- Results will be displayed here -->
+        </div>
+
+        <script>
+            function calculate() {
+                const energyMMBtu = parseFloat(document.getElementById('energy').value);
+                const baselineFuelSelect = document.getElementById('baseline_fuel_select');
+                const ci_baseline = parseFloat(baselineFuelSelect.value); // Get CI from selected option
+                const ci_renewable = parseFloat(document.getElementById('ci_renewable').value);
+                const resultsDiv = document.getElementById('results');
+
+                // Check if a baseline fuel is selected and other inputs are valid
+                if (isNaN(energyMMBtu) || isNaN(ci_baseline) || isNaN(ci_renewable) || baselineFuelSelect.value === "") {
+                    resultsDiv.classList.remove('hidden'); // Show results div for error message
+                    resultsDiv.innerHTML = "<p class='text-red-600 font-semibold'>Please enter valid numbers for all fields and select a baseline fuel.</p>";
+                    return;
+                }
+
+                const MJ = energyMMBtu * 1055.06;
+                const CI_saved = ci_baseline - ci_renewable;
+                const gCO2e_saved = MJ * CI_saved;
+                const lbCO2e_saved = gCO2e_saved * 0.00220462;
+
+                // EPA equivalencies (updated for 2024 data, if available, otherwise using common values)
+                // These values can vary slightly by source/year, so using commonly cited ones.
+                const passengerVehicles = lbCO2e_saved / 10141; // lbs CO2e per average passenger vehicle per year
+                const heavyDutyTrucks = lbCO2e_saved / 49337; // lbs CO2e per average heavy-duty diesel truck per year
+
+                resultsDiv.classList.remove('hidden'); // Show results div
+                resultsDiv.innerHTML = `
+                    <p class="text-lg mb-3"><strong>Total GHG Savings:</strong> <span class="text-blue-700">${lbCO2e_saved.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span> lbs CO₂e</p>
+                    <p class="text-lg mb-2">Equivalent to removing:</p>
+                    <ul class="list-disc list-inside ml-4 space-y-1">
+                        <li><strong>${passengerVehicles.toFixed(2)}</strong> passenger vehicles (1 year)</li>
+                        <li><strong>${heavyDutyTrucks.toFixed(2)}</strong> heavy-duty diesel trucks (1 year)</li>
+                    </ul>
+                `;
+            }
+        </script>
+    </div>
+</body>
+</html>
