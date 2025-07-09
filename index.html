@@ -66,6 +66,8 @@
                 const CI_saved = ci_baseline - ci_renewable;
                 const gCO2e_saved = MJ * CI_saved;
                 const lbCO2e_saved = gCO2e_saved * 0.00220462;
+                // Calculate metric tons of CO2e saved
+                const metricTonsCO2e_saved = lbCO2e_saved / 2204.62;
 
                 // EPA equivalencies (updated for 2024 data, if available, otherwise using common values)
                 // These values can vary slightly by source/year, so using commonly cited ones.
@@ -75,6 +77,7 @@
                 resultsDiv.classList.remove('hidden'); // Show results div
                 resultsDiv.innerHTML = `
                     <p class="text-lg mb-3"><strong>Total GHG Savings:</strong> <span class="text-blue-700">${lbCO2e_saved.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span> lbs CO₂e</p>
+                    <p class="text-lg mb-3"><strong>Total GHG Savings:</strong> <span class="text-blue-700">${metricTonsCO2e_saved.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span> metric tons CO₂e</p>
                     <p class="text-lg mb-2">Equivalent to removing:</p>
                     <ul class="list-disc list-inside ml-4 space-y-1">
                         <li><strong>${passengerVehicles.toFixed(2)}</strong> passenger vehicles (1 year)</li>
